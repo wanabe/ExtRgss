@@ -12,6 +12,13 @@ HEADERS=ext_rgss.h
 
 all: $(EXT)
 
+pack: ExtRgss.zip
+
+ExtRgss.zip: $(EXT) msvcrt-ruby191.dll $(LOADSO_DIR)/load_so.rb ext_rgss.rb
+	cp $(LOADSO_DIR)/load_so.rb load_so.rb
+	zip ExtRgss.zip $(EXT) msvcrt-ruby191.dll load_so.rb ext_rgss.rb
+	rm load_so.rb
+
 test: all msvcrt-ruby191.dll
 	$(GAME)
 
