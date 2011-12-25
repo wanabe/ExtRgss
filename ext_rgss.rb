@@ -1,5 +1,4 @@
 # encoding: utf-8
-#__END__
 require_so "ExtRgss"
 Graphics.init
 
