@@ -4,7 +4,7 @@ LIBDIRS=-L$(LOADSO_DIR)
 LOADSO_DIR=LoadSo
 LDFLAGS=$(LIBDIRS) -shared
 EXT=ExtRgss.so
-CFLAGS=-Wall -DDLL_NAME="\"$(EXT)\""
+CFLAGS=$(INCDIRS) -Wall -DDLL_NAME="\"$(EXT)\""
 OBJS=ext_rgss.o graphics.o
 LIBS=d3dx9.lib -ld3d9 -lloadso
 GAME=./Game.exe
