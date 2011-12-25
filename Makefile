@@ -14,10 +14,11 @@ all: $(EXT)
 
 pack: ExtRgss.zip
 
-ExtRgss.zip: $(EXT) msvcrt-ruby191.dll $(LOADSO_DIR)/load_so.rb ext_rgss.rb
-	cp $(LOADSO_DIR)/load_so.rb load_so.rb
-	zip ExtRgss.zip $(EXT) msvcrt-ruby191.dll load_so.rb ext_rgss.rb
-	rm load_so.rb
+ExtRgss.zip: $(EXT) msvcrt-ruby191.dll $(LOADSO_DIR)/README.txt $(LOADSO_DIR)/load_so.rb $(LOADSO_DIR)/COPYING.txt $(LOADSO_DIR)/COPYING.ja.txt $(LOADSO_DIR)/BSDL
+	cp $(LOADSO_DIR)/README.txt README-LoadSo.txt
+	cp $(LOADSO_DIR)/load_so.rb $(LOADSO_DIR)/COPYING.txt $(LOADSO_DIR)/COPYING.ja.txt $(LOADSO_DIR)/BSDL .
+	zip ExtRgss.zip $(EXT) msvcrt-ruby191.dll ext_rgss.rb load_so.rb README*.txt load_so.rb COPYING* BSDL
+	rm README-LoadSo.txt load_so.rb COPYING* BSDL
 
 test: all msvcrt-ruby191.dll
 	$(GAME)
