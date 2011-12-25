@@ -12,4 +12,5 @@ d3dx9.lib
 hoge.*
 *.o
 *.dll
+*.so
 *~
