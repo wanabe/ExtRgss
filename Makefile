@@ -5,7 +5,7 @@ LOADSO_DIR=LoadSo
 LDFLAGS=$(LIBDIRS) -shared
 EXT=ExtRgss.so
 CFLAGS=$(INCDIRS) -Wall -DDLL_NAME="\"$(EXT)\""
-OBJS=ext_rgss.o graphics.o
+OBJS=ext_rgss.o graphics.o bitmap.o
 LIBS=d3dx9.lib -ld3d9 -lloadso
 GAME=./Game.exe
 HEADERS=ext_rgss.h
@@ -26,8 +26,9 @@ test: all msvcrt-ruby191.dll
 $(EXT): $(OBJS)
 	$(CC) $(LDFLAGS) -o $(EXT) $(OBJS) $(LIBS)
 
-ext_rgss.o: $(LOADSO_DIR)/rgss.h ext_rgss.h graphics.h
+ext_rgss.o: $(LOADSO_DIR)/rgss.h ext_rgss.h graphics.h bitmap.h
 graphics.o: $(LOADSO_DIR)/rgss.h ext_rgss.h graphics.h
+bitmap.o  : $(LOADSO_DIR)/rgss.h ext_rgss.h bitmap.h
 
 msvcrt-ruby191.dll: $(LOADSO_DIR)/msvcrt-ruby191.dll
 	cp $(LOADSO_DIR)/$@ $@

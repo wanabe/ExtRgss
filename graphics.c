@@ -1,16 +1,9 @@
 #include "ext_rgss.h"
 #include "graphics.h"
+#include "bitmap.h"
 
 LPDIRECT3DDEVICE9 pD3DDevice;
 LPD3DXEFFECT pEffect;
-
-VERTEX vtx[]=
-{
-  {      0,       0,     0,  0xff00ff00, 0.0f,0.0f  },
-  {    544,       0,     0,  0xff0000ff, 1.0f,0.0f  },
-  {      0,     416,     0,  0xffffffff, 0.0f,1.0f  },
-  {    544,     416,     0,  0xffff0000, 1.0f,1.0f  },
-};
 
 struct hWndFinder {
   HWND hWnd;
@@ -28,8 +21,13 @@ static BOOL CALLBACK EnumWindowsProc(HWND hWnd, LPARAM lp) {
   return TRUE;
 }
 
-static LPDIRECT3DTEXTURE9 texture;
-static VALUE Graphics_s_init(VALUE self, VALUE bmp) {
+static BitmapExtData *extdata;
+static VALUE Graphics_s_test(VALUE self, VALUE bmp) {
+  extdata = BITMAP_EXTDATA(RGSS_BITMAPDATA(bmp));
+  return self;
+}
+
+static VALUE Graphics_s_init(VALUE self) {
   HRESULT hr;
   LPDIRECT3D9 pD3D;
   D3DPRESENT_PARAMETERS D3DPP = {0,0,D3DFMT_UNKNOWN,0,D3DMULTISAMPLE_NONE,0,
@@ -63,27 +61,6 @@ static VALUE Graphics_s_init(VALUE self, VALUE bmp) {
       rb_raise(rb_eRuntimeError, "Can't load effect file");
     }
   }
-
-  { /* the section is for drawing test. */
-    D3DLOCKED_RECT lockRect;
-    int y;
-    RgssBitmapData *bmpdata = RGSS_BITMAPDATA(bmp);
-    DWORD *src;
-    char *dst;
-    pD3DDevice->lpVtbl->CreateTexture(
-      pD3DDevice, bmpdata->info->biWidth, bmpdata->info->biHeight, 1, 0, D3DFMT_A8R8G8B8,
-      D3DPOOL_MANAGED, &texture, NULL);
-    texture->lpVtbl->LockRect(texture, 0, &lockRect, NULL, D3DLOCK_DISCARD);
-    src = bmpdata->buffer;
-    dst = lockRect.pBits + bmpdata->info->biHeight * lockRect.Pitch;
-    for(y = 0; y < bmpdata->info->biHeight; y++) {
-      dst -= lockRect.Pitch;
-      memcpy(dst, src, sizeof(DWORD) * bmpdata->info->biWidth);
-      src += bmpdata->info->biWidth;
-    }
-    texture->lpVtbl->UnlockRect(texture, 0);
-  }
-
   return self;
 }
 
@@ -93,13 +70,13 @@ static VALUE Graphics_s_update(VALUE self) {
   pD3DDevice->lpVtbl->Clear(pD3DDevice, 0, NULL, (D3DCLEAR_TARGET|D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(0,0,0,0), 1.0f, 0);
   pD3DDevice->lpVtbl->SetFVF(pD3DDevice, FVF_VERTEX);
   pEffect->lpVtbl->SetMatrix(pEffect,  "matWVP", &mat);
-  pEffect->lpVtbl->SetTexture(pEffect, "Tex", (LPDIRECT3DBASETEXTURE9)texture);
+  pEffect->lpVtbl->SetTexture(pEffect, "Tex", (LPDIRECT3DBASETEXTURE9)extdata->texture);
   pEffect->lpVtbl->SetTechnique(pEffect, "ExtRgssTec");
   if(SUCCEEDED(pD3DDevice->lpVtbl->BeginScene(pD3DDevice))) {
     UINT numPass;
     pEffect->lpVtbl->Begin(pEffect, &numPass, 0 );
     pEffect->lpVtbl->BeginPass(pEffect, 0);
-    pD3DDevice->lpVtbl->DrawPrimitiveUP(pD3DDevice, D3DPT_TRIANGLESTRIP, 2, vtx, sizeof(VERTEX));
+    pD3DDevice->lpVtbl->DrawPrimitiveUP(pD3DDevice, D3DPT_TRIANGLESTRIP, 2, extdata->vertex_data, sizeof(VERTEX));
     pEffect->lpVtbl->EndPass(pEffect);
     pEffect->lpVtbl->End(pEffect);
     pD3DDevice->lpVtbl->EndScene(pD3DDevice);
@@ -112,15 +89,43 @@ static VALUE Graphics_s_dummy() {
   return Qnil;
 }
 
+void Graphics__create_texture(LPDIRECT3DTEXTURE9 *ptr_texture, VERTEX *v, LONG w, LONG h) {
+  pD3DDevice->lpVtbl->CreateTexture(pD3DDevice, w, h, 1, 0, D3DFMT_A8R8G8B8,
+                                    D3DPOOL_MANAGED, ptr_texture, NULL);
+  v[0].z = v[1].z = v[2].z = v[3].z = 0;
+  v[0].x = v[0].y = v[1].y = v[2].x = 0;
+  v[1].x = v[3].x = w;
+  v[2].y = v[3].y = h;
+  v[0].u = v[0].v = v[1].v = v[2].u = 0;
+  v[1].u = v[2].v = v[3].u = v[3].v = 1;
+}
+
+void Graphics__update_texture(LPDIRECT3DTEXTURE9 texture, DWORD *src, LONG w, LONG h) {
+  D3DLOCKED_RECT lockRect;
+  char *dst;
+  int y;
+
+  texture->lpVtbl->LockRect(texture, 0, &lockRect, NULL, D3DLOCK_DISCARD);
+  dst = lockRect.pBits + h * lockRect.Pitch;
+  for(y = 0; y < h; y++) {
+    dst -= lockRect.Pitch;
+    memcpy(dst, src, sizeof(DWORD) * w);
+    src += w;
+  }
+  texture->lpVtbl->UnlockRect(texture, 0);
+}
+
 void Init_ExtGraphics() {
   VALUE mOldGraphics = rb_const_get(rb_cObject, rb_intern("Graphics"));
   VALUE mGraphics = rb_define_module_under(mExtRgss, "Graphics");
   rb_const_set(rb_cObject, rb_intern("OldGraphics"), mOldGraphics);
   rb_const_set(rb_cObject, rb_intern("Graphics"), mGraphics);
-  rb_define_singleton_method(mGraphics, "init", Graphics_s_init, 1);
+  rb_define_singleton_method(mGraphics, "init", Graphics_s_init, 0);
   rb_define_singleton_method(mGraphics, "update", Graphics_s_update, 0);
   rb_define_singleton_method(mGraphics, "freeze", Graphics_s_dummy, 0);
   rb_define_singleton_method(mGraphics, "transition", Graphics_s_dummy, -1);
   rb_define_singleton_method(mGraphics, "fadein", Graphics_s_dummy, 1);
   rb_define_singleton_method(mGraphics, "fadeout", Graphics_s_dummy, 1);
+
+  rb_define_singleton_method(mGraphics, "test", Graphics_s_test, 1);
 }

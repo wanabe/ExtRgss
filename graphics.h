@@ -1,3 +1,6 @@
+#ifndef __EXTRGSS_GRAPHICS_H__
+#define __EXTRGSS_GRAPHICS_H__
+
 #include "d3d9.h"
 #include "d3dx9.h"
 
@@ -10,3 +13,7 @@ typedef struct
 } VERTEX;
 
 extern void Init_ExtGraphics();
+extern void Graphics__create_texture(LPDIRECT3DTEXTURE9 *ptr_texture, VERTEX *v, LONG w, LONG h);
+extern void Graphics__update_texture(LPDIRECT3DTEXTURE9 texture, DWORD *src, LONG w, LONG h);
+
+#endif
