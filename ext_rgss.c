@@ -8,4 +8,5 @@ void Init_ExtRgss() {
   mExtRgss = rb_define_module("ExtRgss");
   Init_ExtGraphics();
   Init_ExtBitmap();
+  Init_ExtSprite();
 }

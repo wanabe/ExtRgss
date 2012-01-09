@@ -4,11 +4,30 @@ Graphics.init
 Graphics.test(Bitmap.new("Graphics/Titles1/Plain.png"))
 
 # generate stub and show TODO
-[:Graphics].each do |name|
+[:Graphics, :Sprite].each do |name|
   old_name = "Old#{name}".intern
   method_list = Object.const_get(old_name).methods(false) - Object.const_get(name).methods(false)
+  method_list.sort!
   method_list.each do |method_name|
     eval "def #{name}.#{method_name}(*args); #{old_name}.send(:#{method_name}, *args); end"
   end
-  puts "* #{name} TODO:\n  methods - #{method_list.join(', ')}"
+  imethod_list = Object.const_get(old_name).instance_methods(false) - Object.const_get(name).instance_methods(false)
+  imethod_list.sort!
+  imethod_list.each do |method_name|
+    eval "class #{name}; def #{method_name}(*args); @old.send(:#{method_name}, *args); end; end"
+  end
+  unless imethod_list.empty?
+    eval <<-EOS
+    class #{name}
+      alias old_initialize initialize
+      def initialize(*args)
+        send(:old_initialize, *args)
+        @old = #{old_name}.send(:new, *args)
+      end
+    end
+    EOS
+  end
+  puts "* #{name} TODO:",
+       "  + methods - #{method_list.join(', ')}",
+       "  + instance methods - #{imethod_list.join(', ')}"
 end
