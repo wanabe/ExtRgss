@@ -28,7 +28,8 @@ static BOOL CALLBACK EnumWindowsProc(HWND hWnd, LPARAM lp) {
   return TRUE;
 }
 
-static VALUE Graphics_s_init(VALUE self) {
+static LPDIRECT3DTEXTURE9 texture;
+static VALUE Graphics_s_init(VALUE self, VALUE bmp) {
   HRESULT hr;
   LPDIRECT3D9 pD3D;
   D3DPRESENT_PARAMETERS D3DPP = {0,0,D3DFMT_UNKNOWN,0,D3DMULTISAMPLE_NONE,0,
@@ -62,6 +63,27 @@ static VALUE Graphics_s_init(VALUE self) {
       rb_raise(rb_eRuntimeError, "Can't load effect file");
     }
   }
+
+  { /* the section is for drawing test. */
+    D3DLOCKED_RECT lockRect;
+    int y;
+    RgssBitmapData *bmpdata = RGSS_BITMAPDATA(bmp);
+    DWORD *src;
+    char *dst;
+    pD3DDevice->lpVtbl->CreateTexture(
+      pD3DDevice, bmpdata->info->biWidth, bmpdata->info->biHeight, 1, 0, D3DFMT_A8R8G8B8,
+      D3DPOOL_MANAGED, &texture, NULL);
+    texture->lpVtbl->LockRect(texture, 0, &lockRect, NULL, D3DLOCK_DISCARD);
+    src = bmpdata->buffer;
+    dst = lockRect.pBits + bmpdata->info->biHeight * lockRect.Pitch;
+    for(y = 0; y < bmpdata->info->biHeight; y++) {
+      dst -= lockRect.Pitch;
+      memcpy(dst, src, sizeof(DWORD) * bmpdata->info->biWidth);
+      src += bmpdata->info->biWidth;
+    }
+    texture->lpVtbl->UnlockRect(texture, 0);
+  }
+
   return self;
 }
 
@@ -70,7 +92,8 @@ static VALUE Graphics_s_update(VALUE self) {
 
   pD3DDevice->lpVtbl->Clear(pD3DDevice, 0, NULL, (D3DCLEAR_TARGET|D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(0,0,0,0), 1.0f, 0);
   pD3DDevice->lpVtbl->SetFVF(pD3DDevice, FVF_VERTEX);
-  pEffect->lpVtbl->SetMatrix(pEffect,  "matWVP", &mat );
+  pEffect->lpVtbl->SetMatrix(pEffect,  "matWVP", &mat);
+  pEffect->lpVtbl->SetTexture(pEffect, "Tex", (LPDIRECT3DBASETEXTURE9)texture);
   pEffect->lpVtbl->SetTechnique(pEffect, "ExtRgssTec");
   if(SUCCEEDED(pD3DDevice->lpVtbl->BeginScene(pD3DDevice))) {
     UINT numPass;
@@ -94,7 +117,7 @@ void Init_ExtGraphics() {
   VALUE mGraphics = rb_define_module_under(mExtRgss, "Graphics");
   rb_const_set(rb_cObject, rb_intern("OldGraphics"), mOldGraphics);
   rb_const_set(rb_cObject, rb_intern("Graphics"), mGraphics);
-  rb_define_singleton_method(mGraphics, "init", Graphics_s_init, 0);
+  rb_define_singleton_method(mGraphics, "init", Graphics_s_init, 1);
   rb_define_singleton_method(mGraphics, "update", Graphics_s_update, 0);
   rb_define_singleton_method(mGraphics, "freeze", Graphics_s_dummy, 0);
   rb_define_singleton_method(mGraphics, "transition", Graphics_s_dummy, -1);

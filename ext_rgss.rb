@@ -1,6 +1,7 @@
 # encoding: utf-8
 require_so "ExtRgss"
-Graphics.init
+$bmp = Bitmap.new("Graphics/Titles1/Plain.png")
+Graphics.init($bmp)
 
 # generate stub and show TODO
 [:Graphics].each do |name|
