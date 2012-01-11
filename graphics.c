@@ -1,9 +1,11 @@
 #include "ext_rgss.h"
 #include "graphics.h"
 #include "bitmap.h"
+#include "sprite.h"
 
 LPDIRECT3DDEVICE9 pD3DDevice;
 LPD3DXEFFECT pEffect;
+VALUE mGraphics;
 
 struct hWndFinder {
   HWND hWnd;
@@ -19,12 +21,6 @@ static BOOL CALLBACK EnumWindowsProc(HWND hWnd, LPARAM lp) {
     return FALSE;
   }
   return TRUE;
-}
-
-static BitmapExtData *extdata;
-static VALUE Graphics_s_test(VALUE self, VALUE bmp) {
-  extdata = BITMAP_EXTDATA(RGSS_BITMAPDATA(bmp));
-  return self;
 }
 
 static VALUE Graphics_s_init(VALUE self) {
@@ -66,17 +62,30 @@ static VALUE Graphics_s_init(VALUE self) {
 
 static VALUE Graphics_s_update(VALUE self) {
   D3DXMATRIX mat = {{{1.0/544,0,0,0, 0,-1.0/416,0,0, 1,-1,-1,-1, -1.0/2,1.0/2,1.0/2,1.0/2}}};
+  VALUE sprites = rb_ivar_get(mGraphics, rb_intern("@sprites"));
+  VALUE *ptr = RARRAY_PTR(sprites);
+  int i, len = RARRAY_LEN(sprites);
+  BitmapExtData *extdata;
 
   pD3DDevice->lpVtbl->Clear(pD3DDevice, 0, NULL, (D3DCLEAR_TARGET|D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(0,0,0,0), 1.0f, 0);
+  pD3DDevice->lpVtbl->SetRenderState(pD3DDevice, D3DRS_ALPHABLENDENABLE,TRUE);
+  pD3DDevice->lpVtbl->SetRenderState(pD3DDevice, D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+  pD3DDevice->lpVtbl->SetRenderState(pD3DDevice, D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
   pD3DDevice->lpVtbl->SetFVF(pD3DDevice, FVF_VERTEX);
   pEffect->lpVtbl->SetMatrix(pEffect,  "matWVP", &mat);
-  pEffect->lpVtbl->SetTexture(pEffect, "Tex", (LPDIRECT3DBASETEXTURE9)extdata->texture);
   pEffect->lpVtbl->SetTechnique(pEffect, "ExtRgssTec");
   if(SUCCEEDED(pD3DDevice->lpVtbl->BeginScene(pD3DDevice))) {
     UINT numPass;
     pEffect->lpVtbl->Begin(pEffect, &numPass, 0 );
     pEffect->lpVtbl->BeginPass(pEffect, 0);
-    pD3DDevice->lpVtbl->DrawPrimitiveUP(pD3DDevice, D3DPT_TRIANGLESTRIP, 2, extdata->vertex_data, sizeof(VERTEX));
+    for(i = 0; i < len; i++) {
+      VALUE sprite = ptr[i];
+      VALUE bitmap = EXT_SPRITE(sprite)->bitmap;
+      extdata = BITMAP_EXTDATA(RGSS_BITMAPDATA(bitmap));
+      pEffect->lpVtbl->SetTexture(pEffect, "Tex", (LPDIRECT3DBASETEXTURE9)extdata->texture);
+      pEffect->lpVtbl->CommitChanges(pEffect);
+      pD3DDevice->lpVtbl->DrawPrimitiveUP(pD3DDevice, D3DPT_TRIANGLESTRIP, 2, extdata->vertex_data, sizeof(VERTEX));
+    }
     pEffect->lpVtbl->EndPass(pEffect);
     pEffect->lpVtbl->End(pEffect);
     pD3DDevice->lpVtbl->EndScene(pD3DDevice);
@@ -117,7 +126,9 @@ void Graphics__update_texture(LPDIRECT3DTEXTURE9 texture, DWORD *src, LONG w, LO
 
 void Init_ExtGraphics() {
   VALUE mOldGraphics = rb_const_get(rb_cObject, rb_intern("Graphics"));
-  VALUE mGraphics = rb_define_module_under(mExtRgss, "Graphics");
+  mGraphics = rb_define_module_under(mExtRgss, "Graphics");
+  VALUE sprites = rb_ary_new();
+  rb_ivar_set(mGraphics, rb_intern("@sprites"), sprites);
   rb_const_set(rb_cObject, rb_intern("OldGraphics"), mOldGraphics);
   rb_const_set(rb_cObject, rb_intern("Graphics"), mGraphics);
   rb_define_singleton_method(mGraphics, "init", Graphics_s_init, 0);
@@ -126,6 +137,4 @@ void Init_ExtGraphics() {
   rb_define_singleton_method(mGraphics, "transition", Graphics_s_dummy, -1);
   rb_define_singleton_method(mGraphics, "fadein", Graphics_s_dummy, 1);
   rb_define_singleton_method(mGraphics, "fadeout", Graphics_s_dummy, 1);
-
-  rb_define_singleton_method(mGraphics, "test", Graphics_s_test, 1);
 }

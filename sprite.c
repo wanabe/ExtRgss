@@ -1,16 +1,19 @@
 #include "ext_rgss.h"
-
-typedef struct {
-} Sprite_t;
+#include "graphics.h"
+#include "sprite.h"
 
 static void Sprite__mark(void *ptr) {
+  Sprite *sprite = (Sprite*)ptr;
+  if(sprite->bitmap) {
+    rb_gc_mark(sprite->bitmap);
+  }
 }
 
 static void Sprite__free(void *ptr) {
 }
 
 static size_t Sprite__memsize(const void *ptr) {
-  return ptr ? sizeof(Sprite_t) : 0;
+  return ptr ? sizeof(Sprite) : 0;
 }
 
 static const rb_data_type_t Sprite_data_type = {
@@ -19,11 +22,30 @@ static const rb_data_type_t Sprite_data_type = {
 
 static VALUE Sprite_s_alloc(VALUE klass) {
   VALUE obj;
-  Sprite_t *sprite;
+  Sprite *sprite;
 
-  obj = TypedData_Make_Struct(klass, Sprite_t, &Sprite_data_type, sprite);
+  obj = TypedData_Make_Struct(klass, Sprite, &Sprite_data_type, sprite);
 
   return obj;
+}
+
+static VALUE Sprite_initialize(int argc, VALUE *argv, VALUE self) {
+  VALUE sprites = rb_ivar_get(mGraphics, rb_intern("@sprites"));
+  rb_ary_push(sprites, self);
+  return self;
+}
+
+static VALUE Sprite_bitmap_set(VALUE self, VALUE bitmap) {
+  Sprite *sprite = EXT_SPRITE(self);
+
+  sprite->bitmap = bitmap;
+  return bitmap;
+}
+
+static VALUE Sprite_bitmap(VALUE self) {
+  Sprite *sprite = EXT_SPRITE(self);
+
+  return sprite->bitmap;
 }
 
 void Init_ExtSprite() {
@@ -33,4 +55,7 @@ void Init_ExtSprite() {
   rb_const_set(rb_cObject, rb_intern("Sprite"), cSprite);
 
   rb_define_alloc_func(cSprite, Sprite_s_alloc);
+  rb_define_method(cSprite, "initialize", Sprite_initialize, -1);
+  rb_define_method(cSprite, "bitmap=", Sprite_bitmap_set, 1);
+  rb_define_method(cSprite, "bitmap", Sprite_bitmap, 0);
 }

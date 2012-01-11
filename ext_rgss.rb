@@ -1,7 +1,6 @@
 # encoding: utf-8
 require_so "ExtRgss"
 Graphics.init
-Graphics.test(Bitmap.new("Graphics/Titles1/Plain.png"))
 
 # generate stub and show TODO
 [:Graphics, :Sprite].each do |name|

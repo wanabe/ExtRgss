@@ -16,4 +16,6 @@ extern void Init_ExtGraphics();
 extern void Graphics__create_texture(LPDIRECT3DTEXTURE9 *ptr_texture, VERTEX *v, LONG w, LONG h);
 extern void Graphics__update_texture(LPDIRECT3DTEXTURE9 texture, DWORD *src, LONG w, LONG h);
 
+extern VALUE mGraphics;
+
 #endif
