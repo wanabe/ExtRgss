@@ -25,9 +25,14 @@ static VALUE Sprite_s_alloc(VALUE klass) {
   return obj;
 }
 
+static VALUE old_call(VALUE self, ID mid, int argc, VALUE *argv) {
+  return rb_funcall2(rb_ivar_get(self, rb_intern("@old")), mid, argc, argv);
+}
+
 static VALUE Sprite_initialize(int argc, VALUE *argv, VALUE self) {
   VALUE sprites = rb_ivar_get(mGraphics, rb_intern("@sprites"));
   rb_ary_push(sprites, self);
+  old_call(self, rb_intern("initialize"), argc, argv);
   return self;
 }
 
@@ -36,11 +41,14 @@ static VALUE Sprite_bitmap_set(VALUE self, VALUE bitmap) {
 
   rb_ivar_set(self, "@bitmap", bitmap);
   sprite->bitmap = bitmap;
+  old_call(self, rb_intern("bitmap="), 1, &bitmap);
   return bitmap;
 }
 
 static VALUE Sprite_bitmap(VALUE self) {
   Sprite *sprite = EXT_SPRITE(self);
+
+  old_call(self, rb_intern("bitmap"), 0, NULL);
 
   return sprite->bitmap;
 }
@@ -49,6 +57,7 @@ static VALUE Sprite_dispose(VALUE self) {
   VALUE sprites = rb_ivar_get(mGraphics, rb_intern("@sprites"));
 
   rb_ary_delete(sprites, self);
+  old_call(self, rb_intern("dispose"), 0, NULL);
 
   return self;
 }
