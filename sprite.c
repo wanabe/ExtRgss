@@ -3,10 +3,6 @@
 #include "sprite.h"
 
 static void Sprite__mark(void *ptr) {
-  Sprite *sprite = (Sprite*)ptr;
-  if(sprite->bitmap) {
-    rb_gc_mark(sprite->bitmap);
-  }
 }
 
 static void Sprite__free(void *ptr) {
@@ -38,6 +34,7 @@ static VALUE Sprite_initialize(int argc, VALUE *argv, VALUE self) {
 static VALUE Sprite_bitmap_set(VALUE self, VALUE bitmap) {
   Sprite *sprite = EXT_SPRITE(self);
 
+  rb_ivar_set(self, "@bitmap", bitmap);
   sprite->bitmap = bitmap;
   return bitmap;
 }
