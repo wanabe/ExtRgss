@@ -48,6 +48,14 @@ static VALUE Sprite_bitmap(VALUE self) {
   return sprite->bitmap;
 }
 
+static VALUE Sprite_dispose(VALUE self) {
+  VALUE sprites = rb_ivar_get(mGraphics, rb_intern("@sprites"));
+
+  rb_ary_delete(sprites, self);
+
+  return self;
+}
+
 void Init_ExtSprite() {
   VALUE cOldSprite = rb_const_get(rb_cObject, rb_intern("Sprite"));
   VALUE cSprite = rb_define_class_under(mExtRgss, "Sprite", rb_cObject);
@@ -58,4 +66,5 @@ void Init_ExtSprite() {
   rb_define_method(cSprite, "initialize", Sprite_initialize, -1);
   rb_define_method(cSprite, "bitmap=", Sprite_bitmap_set, 1);
   rb_define_method(cSprite, "bitmap", Sprite_bitmap, 0);
+  rb_define_method(cSprite, "dispose", Sprite_dispose, 0);
 }
