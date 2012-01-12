@@ -5,7 +5,7 @@
 
 LPDIRECT3DDEVICE9 pD3DDevice;
 LPD3DXEFFECT pEffect;
-VALUE mGraphics;
+VALUE mGraphics, mOldGraphics;
 
 struct hWndFinder {
   HWND hWnd;
@@ -124,8 +124,16 @@ void Graphics__update_texture(LPDIRECT3DTEXTURE9 texture, DWORD *src, LONG w, LO
   texture->lpVtbl->UnlockRect(texture, 0);
 }
 
+static VALUE Graphics_snap_to_bitmap(VALUE self) {
+  VALUE bmp = rb_funcall(mOldGraphics, rb_intern("snap_to_bitmap"), 0);
+
+  Bitmap__init_extdata(bmp);
+
+  return bmp;
+}
+
 void Init_ExtGraphics() {
-  VALUE mOldGraphics = rb_const_get(rb_cObject, rb_intern("Graphics"));
+  mOldGraphics = rb_const_get(rb_cObject, rb_intern("Graphics"));
   mGraphics = rb_define_module_under(mExtRgss, "Graphics");
   VALUE sprites = rb_ary_new();
   rb_ivar_set(mGraphics, rb_intern("@sprites"), sprites);
@@ -137,4 +145,5 @@ void Init_ExtGraphics() {
   rb_define_singleton_method(mGraphics, "transition", Graphics_s_dummy, -1);
   rb_define_singleton_method(mGraphics, "fadein", Graphics_s_dummy, 1);
   rb_define_singleton_method(mGraphics, "fadeout", Graphics_s_dummy, 1);
+  rb_define_singleton_method(mGraphics, "snap_to_bitmap", Graphics_snap_to_bitmap, 0);
 }

@@ -16,7 +16,7 @@ static void BitmapData__update(RgssBitmapData *bmpdata) {
   Graphics__update_texture(extdata->texture, bmpdata->buffer, bmpdata->info->biWidth, bmpdata->info->biHeight);
 }
 
-static void Bitmap__init_extdata(VALUE bmp) {
+void Bitmap__init_extdata(VALUE bmp) {
   RgssBitmapData *bmpdata;
   BitmapExtData *extdata;
 
