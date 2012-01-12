@@ -41,6 +41,7 @@ static VALUE Sprite_bitmap_set(VALUE self, VALUE bitmap) {
 
   rb_ivar_set(self, "@bitmap", bitmap);
   sprite->bitmap = bitmap;
+  Graphics__update_vertex(bitmap, sprite->vertex_data);
   old_call(self, rb_intern("bitmap="), 1, &bitmap);
   return bitmap;
 }

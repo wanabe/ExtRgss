@@ -79,12 +79,12 @@ static VALUE Graphics_s_update(VALUE self) {
     pEffect->lpVtbl->Begin(pEffect, &numPass, 0 );
     pEffect->lpVtbl->BeginPass(pEffect, 0);
     for(i = 0; i < len; i++) {
-      VALUE sprite = ptr[i];
-      VALUE bitmap = EXT_SPRITE(sprite)->bitmap;
+      Sprite *sprite = EXT_SPRITE(ptr[i]);
+      VALUE bitmap = sprite->bitmap;
       extdata = BITMAP_EXTDATA(RGSS_BITMAPDATA(bitmap));
       pEffect->lpVtbl->SetTexture(pEffect, "Tex", (LPDIRECT3DBASETEXTURE9)extdata->texture);
       pEffect->lpVtbl->CommitChanges(pEffect);
-      pD3DDevice->lpVtbl->DrawPrimitiveUP(pD3DDevice, D3DPT_TRIANGLESTRIP, 2, extdata->vertex_data, sizeof(VERTEX));
+      pD3DDevice->lpVtbl->DrawPrimitiveUP(pD3DDevice, D3DPT_TRIANGLESTRIP, 2, sprite->vertex_data, sizeof(VERTEX));
     }
     pEffect->lpVtbl->EndPass(pEffect);
     pEffect->lpVtbl->End(pEffect);
@@ -98,15 +98,9 @@ static VALUE Graphics_s_dummy() {
   return Qnil;
 }
 
-void Graphics__create_texture(LPDIRECT3DTEXTURE9 *ptr_texture, VERTEX *v, LONG w, LONG h) {
+void Graphics__create_texture(LPDIRECT3DTEXTURE9 *ptr_texture, LONG w, LONG h) {
   pD3DDevice->lpVtbl->CreateTexture(pD3DDevice, w, h, 1, 0, D3DFMT_A8R8G8B8,
                                     D3DPOOL_MANAGED, ptr_texture, NULL);
-  v[0].z = v[1].z = v[2].z = v[3].z = 0;
-  v[0].x = v[0].y = v[1].y = v[2].x = 0;
-  v[1].x = v[3].x = w;
-  v[2].y = v[3].y = h;
-  v[0].u = v[0].v = v[1].v = v[2].u = 0;
-  v[1].u = v[2].v = v[3].u = v[3].v = 1;
 }
 
 void Graphics__update_texture(LPDIRECT3DTEXTURE9 texture, DWORD *src, LONG w, LONG h) {
@@ -122,6 +116,16 @@ void Graphics__update_texture(LPDIRECT3DTEXTURE9 texture, DWORD *src, LONG w, LO
     src += w;
   }
   texture->lpVtbl->UnlockRect(texture, 0);
+}
+
+void Graphics__update_vertex(VALUE bitmap, VERTEX *v) {
+  RgssBitmapData *bmpdata = RGSS_BITMAPDATA(bitmap);
+  v[0].z = v[1].z = v[2].z = v[3].z = 0;
+  v[0].x = v[0].y = v[1].y = v[2].x = 0;
+  v[1].x = v[3].x = bmpdata->info->biWidth;
+  v[2].y = v[3].y = bmpdata->info->biHeight;
+  v[0].u = v[0].v = v[1].v = v[2].u = 0;
+  v[1].u = v[2].v = v[3].u = v[3].v = 1;
 }
 
 static VALUE Graphics_snap_to_bitmap(VALUE self) {
