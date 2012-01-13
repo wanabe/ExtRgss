@@ -20,8 +20,8 @@ Graphics.init
     class #{name}
       alias old_initialize initialize
       def initialize(*args)
-        send(:old_initialize, *args)
         @old = #{old_name}.send(:new, *args)
+        send(:old_initialize, *args)
       end
     end
     EOS
