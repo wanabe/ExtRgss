@@ -40,6 +40,8 @@ static VALUE Sprite_initialize(int argc, VALUE *argv, VALUE self) {
   rb_ivar_set(self, rb_intern("@src_rect"), src_rect);
   sprite->src_rect = src_rect;
 
+  sprite->disposed = 0;
+  sprite->visible = 1;
   return self;
 }
 
@@ -68,8 +70,11 @@ static VALUE Sprite_bitmap(VALUE self) {
 }
 
 static VALUE Sprite_dispose(VALUE self) {
-  VALUE sprites = rb_ivar_get(mGraphics, rb_intern("@sprites"));
+  Sprite *sprite = EXT_SPRITE(self);
 
+  if(!sprite->disposed) {
+    VALUE sprites = rb_ivar_get(mGraphics, rb_intern("@sprites"));
+    rb_ary_delete(sprites, self);
   /*VALUE src_rect;
   unsigned char *ptr;
   int i;
@@ -77,6 +82,8 @@ static VALUE Sprite_dispose(VALUE self) {
   ptr = (char*)(DATA_PTR(src_rect));
   for(i = 0; i < 50; i++) {
     printf("%02x ", *ptr++);
+    old_call(self, rb_intern("dispose"), 0, NULL);
+    sprite->disposed = 1;
   }
   rb_p(src_rect);*/
   rb_ary_delete(sprites, self);
@@ -106,6 +113,21 @@ static VALUE Sprite_src_rect(VALUE self) {
   return sprite->src_rect;
 }
 
+static VALUE Sprite_visible_set(VALUE self, VALUE visible) {
+  Sprite *sprite = EXT_SPRITE(self);
+
+  sprite->visible = !!RTEST(visible);
+  old_call(self, rb_intern("visible="), 1, &visible);
+
+  return visible;
+}
+
+static VALUE Sprite_visible(VALUE self) {
+  Sprite *sprite = EXT_SPRITE(self);
+
+  return sprite->visible ? Qtrue : Qfalse;
+}
+
 void Init_ExtSprite() {
   VALUE cOldSprite = rb_const_get(rb_cObject, rb_intern("Sprite"));
   VALUE cSprite = rb_define_class_under(mExtRgss, "Sprite", rb_cObject);
@@ -120,4 +142,6 @@ void Init_ExtSprite() {
   rb_define_method(cSprite, "dispose", Sprite_dispose, 0);
   rb_define_method(cSprite, "src_rect=", Sprite_src_rect_set, 1);
   rb_define_method(cSprite, "src_rect", Sprite_src_rect, 0);
+  rb_define_method(cSprite, "visible=", Sprite_visible_set, 1);
+  rb_define_method(cSprite, "visible", Sprite_visible, 0);
 }

@@ -81,6 +81,9 @@ static VALUE Graphics_s_update(VALUE self) {
     for(i = 0; i < len; i++) {
       Sprite *sprite = EXT_SPRITE(ptr[i]);
       VALUE bitmap = sprite->bitmap;
+      if(sprite->disposed || !sprite->visible || !RTEST(bitmap)) {
+        continue;
+      }
       extdata = BITMAP_EXTDATA(RGSS_BITMAPDATA(bitmap));
       pEffect->lpVtbl->SetTexture(pEffect, "Tex", (LPDIRECT3DBASETEXTURE9)extdata->texture);
       pEffect->lpVtbl->CommitChanges(pEffect);
