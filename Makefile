@@ -5,7 +5,7 @@ LOADSO_DIR=LoadSo
 LDFLAGS=$(LIBDIRS) -shared
 EXT=ExtRgss.so
 CFLAGS=$(INCDIRS) -Wall -DDLL_NAME="\"$(EXT)\""
-OBJS=ext_rgss.o ext_rgss.def graphics.o bitmap.o sprite.o
+OBJS=ext_rgss.o ext_rgss.def graphics.o bitmap.o sprite.o rect.o
 LIBS=d3dx9.lib -ld3d9 -lloadso
 GAME=./Game.exe
 HEADERS=ext_rgss.h

@@ -15,7 +15,7 @@ typedef struct
 extern void Init_ExtGraphics();
 extern void Graphics__create_texture(LPDIRECT3DTEXTURE9 *ptr_texture, LONG w, LONG h);
 extern void Graphics__update_texture(LPDIRECT3DTEXTURE9 texture, DWORD *src, LONG w, LONG h);
-extern void Graphics__update_vertex(VALUE bitmap, VERTEX *v);
+extern void Graphics__update_vertex(VERTEX *v, LONG x, LONG y, LONG w, LONG h, RgssRect *rect);
 
 extern VALUE mGraphics;
 

@@ -13,4 +13,5 @@ void Init_ExtRgss() {
   Init_ExtGraphics();
   Init_ExtBitmap();
   Init_ExtSprite();
+  Init_ExtRect();
 }

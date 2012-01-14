@@ -121,14 +121,16 @@ void Graphics__update_texture(LPDIRECT3DTEXTURE9 texture, DWORD *src, LONG w, LO
   texture->lpVtbl->UnlockRect(texture, 0);
 }
 
-void Graphics__update_vertex(VALUE bitmap, VERTEX *v) {
-  RgssBitmapData *bmpdata = RGSS_BITMAPDATA(bitmap);
+void Graphics__update_vertex(VERTEX *v, LONG x, LONG y, LONG w, LONG h, RgssRect *rect) {
   v[0].z = v[1].z = v[2].z = v[3].z = 0;
-  v[0].x = v[0].y = v[1].y = v[2].x = 0;
-  v[1].x = v[3].x = bmpdata->info->biWidth;
-  v[2].y = v[3].y = bmpdata->info->biHeight;
-  v[0].u = v[0].v = v[1].v = v[2].u = 0;
-  v[1].u = v[2].v = v[3].u = v[3].v = 1;
+  v[0].x = v[2].x = x;
+  v[0].y = v[1].y = y;
+  v[1].x = v[3].x = x + rect->w;
+  v[2].y = v[3].y = y + rect->h;
+  v[0].u = v[2].u = (double)rect->x / w;
+  v[0].v = v[1].v = (double)rect->y / h;
+  v[1].u = v[3].u = (double)(rect->x + rect->w) / w;
+  v[2].v = v[3].v = (double)(rect->y + rect->h) / h;
 }
 
 static VALUE Graphics_snap_to_bitmap(VALUE self) {
