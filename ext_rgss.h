@@ -6,3 +6,4 @@
 #endif
 
 extern VALUE mExtRgss;
+VALUE old_call(VALUE self, ID mid, int argc, VALUE *argv);

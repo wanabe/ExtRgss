@@ -28,10 +28,6 @@ static VALUE Sprite_s_alloc(VALUE klass) {
   return obj;
 }
 
-static VALUE old_call(VALUE self, ID mid, int argc, VALUE *argv) {
-  return rb_funcall2(rb_ivar_get(self, rb_intern("@old")), mid, argc, argv);
-}
-
 static VALUE Sprite_initialize(int argc, VALUE *argv, VALUE self) {
   VALUE sprites = rb_ivar_get(mGraphics, rb_intern("@sprites"));
   VALUE src_rect = rb_class_new_instance(0, NULL, cRect);
