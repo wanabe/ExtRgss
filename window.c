@@ -68,6 +68,19 @@ static VALUE Window_contents(VALUE self) {
   return window->contents;
 }
 
+static VALUE Window_dispose(VALUE self) {
+  Window *window = EXT_WINDOW(self);
+
+  if(!window->disposed) {
+    VALUE windows = rb_ivar_get(mGraphics, rb_intern("@windows"));
+    rb_ary_delete(windows, self);
+    Rect__remove_ref(window->cursor_rect, self);
+    old_call(self, rb_intern("dispose"), 0, NULL);
+    window->disposed = 1;
+  }
+  return self;
+}
+
 void Init_ExtWindow() {
   VALUE cOldWindow = rb_const_get(rb_cObject, rb_intern("Window"));
   VALUE cWindow = rb_define_class_under(mExtRgss, "Window", rb_cObject);
@@ -78,4 +91,5 @@ void Init_ExtWindow() {
   rb_define_method(cWindow, "initialize", Window_initialize, -1);
   rb_define_method(cWindow, "contents=", Window_contents_set, 1);
   rb_define_method(cWindow, "contents", Window_contents, 0);
+  rb_define_method(cWindow, "dispose", Window_dispose, 0);
 }
