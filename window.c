@@ -51,6 +51,19 @@ static VALUE Window_initialize(int argc, VALUE *argv, VALUE self) {
   window->disposed = 0;
   window->visible = 1;
 
+  {
+    VERTEX *v = window->vertex_data;
+    v[0].x = v[2].x = 0;
+    v[0].y = v[1].y = 0;
+    v[1].x = v[3].x = 100;
+    v[2].y = v[3].y = 100;
+    v[0].z = v[1].z = v[2].z = v[3].z = 0;
+    v[0].u = v[2].u = 0;
+    v[0].v = v[1].v = 0;
+    v[1].u = v[3].u = 1;
+    v[2].v = v[3].v = 1;
+  }
+
   return self;
 }
 

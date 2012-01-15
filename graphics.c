@@ -2,6 +2,7 @@
 #include "graphics.h"
 #include "bitmap.h"
 #include "sprite.h"
+#include "window.h"
 
 LPDIRECT3DDEVICE9 pD3DDevice;
 LPD3DXEFFECT pEffect;
@@ -63,6 +64,7 @@ static VALUE Graphics_s_init(VALUE self) {
 static VALUE Graphics_s_update(VALUE self) {
   D3DXMATRIX mat = {{{1.0/544,0,0,0, 0,-1.0/416,0,0, 1,-1,-1,-1, -1.0/2,1.0/2,1.0/2,1.0/2}}};
   VALUE sprites = rb_ivar_get(mGraphics, rb_intern("@sprites"));
+  VALUE windows = rb_ivar_get(mGraphics, rb_intern("@windows"));
   VALUE *ptr = RARRAY_PTR(sprites);
   int i, len = RARRAY_LEN(sprites);
   RgssBitmapData *bmpdata, *passed_bmpdata = 0;
@@ -77,6 +79,7 @@ static VALUE Graphics_s_update(VALUE self) {
   if(SUCCEEDED(pD3DDevice->lpVtbl->BeginScene(pD3DDevice))) {
     UINT numPass;
     pEffect->lpVtbl->Begin(pEffect, &numPass, 0 );
+
     pEffect->lpVtbl->BeginPass(pEffect, 0);
     for(i = 0; i < len; i++) {
       Sprite *sprite = EXT_SPRITE(ptr[i]);
@@ -94,6 +97,27 @@ static VALUE Graphics_s_update(VALUE self) {
       pD3DDevice->lpVtbl->DrawPrimitiveUP(pD3DDevice, D3DPT_TRIANGLESTRIP, 2, sprite->vertex_data, sizeof(VERTEX));
     }
     pEffect->lpVtbl->EndPass(pEffect);
+
+    ptr = RARRAY_PTR(windows);
+    len = RARRAY_LEN(windows);
+    pEffect->lpVtbl->BeginPass(pEffect, 0);
+    for(i = 0; i < len; i++) {
+      Window *window = EXT_WINDOW(ptr[i]);
+      VALUE contents = window->contents;
+      if(window->disposed || !window->visible || !RTEST(contents)) {
+        continue;
+      }
+      bmpdata = RGSS_BITMAPDATA(contents);
+      if(passed_bmpdata != bmpdata) {
+        passed_bmpdata = bmpdata;
+        BitmapData__update(bmpdata);
+        pEffect->lpVtbl->SetTexture(pEffect, "Tex", (LPDIRECT3DBASETEXTURE9)BITMAP_EXTDATA(bmpdata)->texture);
+        pEffect->lpVtbl->CommitChanges(pEffect);
+      }
+      pD3DDevice->lpVtbl->DrawPrimitiveUP(pD3DDevice, D3DPT_TRIANGLESTRIP, 2, window->vertex_data, sizeof(VERTEX));
+    }
+    pEffect->lpVtbl->EndPass(pEffect);
+
     pEffect->lpVtbl->End(pEffect);
     pD3DDevice->lpVtbl->EndScene(pD3DDevice);
   }
