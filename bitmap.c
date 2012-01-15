@@ -1,6 +1,8 @@
 #include "ext_rgss.h"
 #include "bitmap.h"
 
+VALUE cBitmap;
+
 static void BitmapData__update(RgssBitmapData *bmpdata) {
   BitmapExtData *extdata;
 
@@ -35,7 +37,7 @@ static VALUE Bitmap_initialize(int argc, VALUE *argv, VALUE self) {
 }
 
 void Init_ExtBitmap() {
-  VALUE cBitmap = rb_const_get(rb_cObject, rb_intern("Bitmap"));
+  cBitmap = rb_const_get(rb_cObject, rb_intern("Bitmap"));
   rb_define_alias(cBitmap, "old_initialize", "initialize");
   rb_define_method(cBitmap, "initialize", Bitmap_initialize, -1);
 }

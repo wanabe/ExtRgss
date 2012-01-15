@@ -1,9 +1,10 @@
 # encoding: utf-8
+#__END__
 require_so "ExtRgss"
 Graphics.init
 
 # generate stub and show TODO
-[:Graphics, :Sprite].each do |name|
+[:Graphics, :Sprite, :Window].each do |name|
   old_name = "Old#{name}".intern
   method_list = Object.const_get(old_name).methods(false) - Object.const_get(name).methods(false)
   method_list.sort!

@@ -1,6 +1,8 @@
 #include "ext_rgss.h"
 #include "graphics.h"
 #include "bitmap.h"
+#include "rect.h"
+#include "window.h"
 
 VALUE mExtRgss;
 
@@ -14,4 +16,5 @@ void Init_ExtRgss() {
   Init_ExtBitmap();
   Init_ExtSprite();
   Init_ExtRect();
+  Init_ExtWindow();
 }

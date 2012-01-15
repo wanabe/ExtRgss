@@ -6,5 +6,7 @@ typedef struct {
 } BitmapExtData;
 #define BITMAP_EXTDATA(bmpdata) ((BitmapExtData*)((bmpdata)->info->biClrImportant))
 
+extern VALUE cBitmap;
+
 extern void Bitmap__init_extdata(VALUE bmp);
 extern void Init_ExtBitmap();

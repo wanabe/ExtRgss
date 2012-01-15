@@ -149,6 +149,8 @@ void Init_ExtGraphics() {
   mGraphics = rb_define_module_under(mExtRgss, "Graphics");
   VALUE sprites = rb_ary_new();
   rb_ivar_set(mGraphics, rb_intern("@sprites"), sprites);
+  VALUE windows = rb_ary_new();
+  rb_ivar_set(mGraphics, rb_intern("@windows"), windows);
   rb_const_set(rb_cObject, rb_intern("OldGraphics"), mOldGraphics);
   rb_const_set(rb_cObject, rb_intern("Graphics"), mGraphics);
   rb_define_singleton_method(mGraphics, "init", Graphics_s_init, 0);
