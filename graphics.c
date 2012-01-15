@@ -65,7 +65,7 @@ static VALUE Graphics_s_update(VALUE self) {
   VALUE sprites = rb_ivar_get(mGraphics, rb_intern("@sprites"));
   VALUE *ptr = RARRAY_PTR(sprites);
   int i, len = RARRAY_LEN(sprites);
-  BitmapExtData *extdata;
+  BitmapExtData *extdata, *passed_extdata = 0;
 
   pD3DDevice->lpVtbl->Clear(pD3DDevice, 0, NULL, (D3DCLEAR_TARGET|D3DCLEAR_ZBUFFER), D3DCOLOR_RGBA(0,0,0,0), 1.0f, 0);
   pD3DDevice->lpVtbl->SetRenderState(pD3DDevice, D3DRS_ALPHABLENDENABLE,TRUE);
@@ -85,8 +85,11 @@ static VALUE Graphics_s_update(VALUE self) {
         continue;
       }
       extdata = BITMAP_EXTDATA(RGSS_BITMAPDATA(bitmap));
-      pEffect->lpVtbl->SetTexture(pEffect, "Tex", (LPDIRECT3DBASETEXTURE9)extdata->texture);
-      pEffect->lpVtbl->CommitChanges(pEffect);
+      if(passed_extdata != extdata) {
+        passed_extdata = extdata;
+        pEffect->lpVtbl->SetTexture(pEffect, "Tex", (LPDIRECT3DBASETEXTURE9)extdata->texture);
+        pEffect->lpVtbl->CommitChanges(pEffect);
+      }
       pD3DDevice->lpVtbl->DrawPrimitiveUP(pD3DDevice, D3DPT_TRIANGLESTRIP, 2, sprite->vertex_data, sizeof(VERTEX));
     }
     pEffect->lpVtbl->EndPass(pEffect);
