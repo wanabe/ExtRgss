@@ -26,10 +26,15 @@ test: all msvcrt-ruby191.dll
 $(EXT): $(OBJS)
 	$(CC) $(LDFLAGS) -o $(EXT) $(OBJS) $(LIBS)
 
-ext_rgss.o: $(LOADSO_DIR)/rgss.h ext_rgss.h graphics.h bitmap.h sprite.h
-graphics.o: $(LOADSO_DIR)/rgss.h ext_rgss.h graphics.h
-bitmap.o  : $(LOADSO_DIR)/rgss.h ext_rgss.h bitmap.h
-sprite.o  : $(LOADSO_DIR)/rgss.h ext_rgss.h sprite.h
+ext_rgss.h: $(LOADSO_DIR)/rgss.h
+	touch ext_rgss.h
+
+ext_rgss.o: ext_rgss.h graphics.h bitmap.h rect.h sprite.h window.h
+graphics.o: ext_rgss.h graphics.h bitmap.h sprite.h window.h
+bitmap.o  : ext_rgss.h graphics.h bitmap.h
+rect.o    : ext_rgss.h graphics.h sprite.h
+sprite.o  : ext_rgss.h graphics.h rect.h sprite.h
+window.o  : ext_rgss.h graphics.h bitmap.h rect.h window.h
 
 msvcrt-ruby191.dll: $(LOADSO_DIR)/msvcrt-ruby191.dll
 	cp $(LOADSO_DIR)/$@ $@

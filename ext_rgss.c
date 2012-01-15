@@ -2,6 +2,7 @@
 #include "graphics.h"
 #include "bitmap.h"
 #include "rect.h"
+#include "sprite.h"
 #include "window.h"
 
 VALUE mExtRgss;
