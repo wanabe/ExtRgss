@@ -60,7 +60,7 @@ static VALUE Sprite_bitmap_set(VALUE self, VALUE bitmap) {
   RgssRect *rect = RGSS_RECT(sprite->src_rect);
   RgssBitmapData *bmpdata = RGSS_BITMAPDATA(bitmap);
   
-  rb_ivar_set(self, "@bitmap", bitmap);
+  rb_ivar_set(self, rb_intern("@bitmap"), bitmap);
   sprite->bitmap = bitmap;
   old_call(self, rb_intern("bitmap="), 1, &bitmap);
   rect->x = rect->y = 0;
@@ -96,7 +96,7 @@ static VALUE Sprite_dispose(VALUE self) {
 static VALUE Sprite_src_rect_set(VALUE self, VALUE src_rect) {
   Sprite *sprite = EXT_SPRITE(self);
 
-  rb_ivar_set(self, "@src_rect", src_rect);
+  rb_ivar_set(self, rb_intern("@src_rect"), src_rect);
   old_call(self, rb_intern("src_rect="), 1, &src_rect);
   Rect__remove_ref(sprite->src_rect, self);
   Rect__add_ref(src_rect, self);
