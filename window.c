@@ -29,6 +29,9 @@ static VALUE Window_s_alloc(VALUE klass) {
 }
 
 static void Window__update_vertex(Window *window) {
+  VALUE contents = window->contents;
+  RgssBitmapData *bmpdata = RGSS_BITMAPDATA(contents);
+  BitmapExtData *extdata = BITMAP_EXTDATA(bmpdata);
   VERTEX *v = window->vertex_data;
   v[0].z = v[1].z = v[2].z = v[3].z = 0;
   v[0].x = v[2].x = window->x;
@@ -37,8 +40,8 @@ static void Window__update_vertex(Window *window) {
   v[2].y = v[3].y = window->y + window->height;
   v[0].u = v[2].u = 0;
   v[0].v = v[1].v = 0;
-  v[1].u = v[3].u = 1;
-  v[2].v = v[3].v = 1;
+  v[1].u = v[3].u = (double)(window->width - 12 * 2) / extdata->texw;
+  v[2].v = v[3].v = (double)(window->height - 12 - 12) / extdata->texh;
   v[0].b1 = v[1].b1 = v[2].b1 = v[3].b1 = window->openness;
 }
 
@@ -54,6 +57,7 @@ static VALUE Window_initialize(int argc, VALUE *argv, VALUE self) {
   contents = old_call(self, rb_intern("contents"), 0, NULL); /* TODO */
   rb_ivar_set(self, rb_intern("@contents"), contents);
   window->contents = contents;
+  Bitmap__init_extdata(contents);
 
   cursor_rect = old_call(self, rb_intern("cursor_rect"), 0, NULL); /* TODO */
   rb_ivar_set(self, rb_intern("@cursor_rect"), cursor_rect);
@@ -88,6 +92,7 @@ static VALUE Window_contents_set(VALUE self, VALUE contents) {
 
   window->contents = contents;
   old_call(self, rb_intern("contents="), 1, &contents);
+  Window__update_vertex(window);
   return contents;
 }
 

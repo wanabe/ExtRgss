@@ -3,6 +3,7 @@
 typedef struct {
   LPDIRECT3DTEXTURE9 texture;
   int changed;
+  int texw, texh;
 } BitmapExtData;
 #define BITMAP_EXTDATA(bmpdata) ((BitmapExtData*)((bmpdata)->info->biClrImportant))
 

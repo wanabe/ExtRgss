@@ -2,6 +2,7 @@
 #include "graphics.h"
 #include "sprite.h"
 #include "rect.h"
+#include "bitmap.h"
 
 static void Sprite__mark(void *ptr) {
 }
@@ -49,10 +50,23 @@ static VALUE Sprite_initialize(int argc, VALUE *argv, VALUE self) {
 }
 
 void Sprite__update_rect(Sprite *sprite) {
+  VERTEX *v = sprite->vertex_data;
   RgssBitmapData *bmpdata = RGSS_BITMAPDATA(sprite->bitmap);
   RgssRect *rect = RGSS_RECT(sprite->src_rect);
+  int x = sprite->x - sprite->ox;
+  int y = sprite->y - sprite->oy;
+  int w = BITMAP_EXTDATA(bmpdata)->texw;
+  int h = BITMAP_EXTDATA(bmpdata)->texh;
 
-  Graphics__update_vertex(sprite->vertex_data, sprite->x - sprite->ox, sprite->y - sprite->oy, bmpdata->info->biWidth, bmpdata->info->biHeight, rect);
+  v[0].z = v[1].z = v[2].z = v[3].z = 0;
+  v[0].x = v[2].x = x;
+  v[0].y = v[1].y = y;
+  v[1].x = v[3].x = x + rect->w;
+  v[2].y = v[3].y = y + rect->h;
+  v[0].u = v[2].u = (double)rect->x / w;
+  v[0].v = v[1].v = (double)rect->y / h;
+  v[1].u = v[3].u = (double)(rect->x + rect->w) / w;
+  v[2].v = v[3].v = (double)(rect->y + rect->h) / h;
 }
 
 static VALUE Sprite_bitmap_set(VALUE self, VALUE bitmap) {
