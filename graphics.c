@@ -100,7 +100,7 @@ static VALUE Graphics_s_update(VALUE self) {
 
     ptr = RARRAY_PTR(windows);
     len = RARRAY_LEN(windows);
-    pEffect->lpVtbl->BeginPass(pEffect, 0);
+    pEffect->lpVtbl->BeginPass(pEffect, 1);
     for(i = 0; i < len; i++) {
       Window *window = EXT_WINDOW(ptr[i]);
       VALUE contents = window->contents;

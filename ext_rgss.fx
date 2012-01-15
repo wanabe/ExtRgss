@@ -19,9 +19,35 @@ float4 TexPixelShader(float2 texCoord0 :TEXCOORD0) :COLOR0 {
   return tex2D(TexSampler, texCoord0);
 }
 
+TEX_VS_OUTPUT WindowContentsVertexShader(float4 pos :POSITION, float4 diffuse :COLOR0, float2 inTexCoord0 :TEXCOORD0) {
+  TEX_VS_OUTPUT outVS;
+
+  if(inTexCoord0.x == 0) {
+    pos.x += 12;
+  } else {
+    pos.x -= 12;
+  }
+  if(inTexCoord0.y == 0) {
+    pos.y += 12;
+  } else {
+    pos.y -= 12;
+  }
+  outVS.pos = mul(pos, matWVP);
+  outVS.diffuse = diffuse;
+  outVS.texCoord0 = inTexCoord0;
+  return outVS;
+}
+float4 WindowContentsPixelShader(float2 texCoord0 :TEXCOORD0) :COLOR0 {
+  return tex2D(TexSampler, texCoord0);
+}
+
 technique ExtRgssTec {
   pass P0 {
     VertexShader = compile vs_2_0 TexVertexShader();
     PixelShader = compile ps_2_0 TexPixelShader();
+  }
+  pass P1 {
+    VertexShader = compile vs_2_0 WindowContentsVertexShader();
+    PixelShader = compile ps_2_0 WindowContentsPixelShader();
   }
 }
