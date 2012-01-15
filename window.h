@@ -3,6 +3,7 @@ typedef struct {
   VALUE cursor_rect;
   VERTEX vertex_data[8];
   int x, y, ox, oy;
+  int width, height;
   int disposed, visible;
 } Window;
 #define EXT_WINDOW(val) ((Window*)(DATA_PTR(val)))
