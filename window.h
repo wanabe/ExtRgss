@@ -5,6 +5,7 @@ typedef struct {
   int x, y, ox, oy;
   int width, height;
   int disposed, visible;
+  int openness;
 } Window;
 #define EXT_WINDOW(val) ((Window*)(DATA_PTR(val)))
 

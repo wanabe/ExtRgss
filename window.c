@@ -39,6 +39,7 @@ static void Window__update_vertex(Window *window) {
   v[0].v = v[1].v = 0;
   v[1].u = v[3].u = 1;
   v[2].v = v[3].v = 1;
+  v[0].b1 = v[1].b1 = v[2].b1 = v[3].b1 = window->openness;
 }
 
 static VALUE Window_initialize(int argc, VALUE *argv, VALUE self) {
@@ -75,6 +76,7 @@ static VALUE Window_initialize(int argc, VALUE *argv, VALUE self) {
   window->ox = window->oy = 0;
   window->disposed = 0;
   window->visible = 1;
+  window->openness = 255;
 
   Window__update_vertex(window);
 
@@ -138,6 +140,29 @@ static VALUE Window_y(VALUE self) {
   return INT2FIX(window->y);
 }
 
+static VALUE Window_openness_set(VALUE self, VALUE openness) {
+  Window *window = EXT_WINDOW(self);
+  int o;
+
+  o = NUM2LONG(openness);
+  if(o < 0) {
+    o = 0;
+  } else if(o > 255) {
+    o = 255;
+  }
+  window->openness = o;
+  openness = INT2FIX(o);
+  Window__update_vertex(window);
+  old_call(self, rb_intern("openness="), 1, &openness);
+  return openness;
+}
+
+static VALUE Window_openness(VALUE self) {
+  Window *window = EXT_WINDOW(self);
+
+  return INT2FIX(window->openness);
+}
+
 void Init_ExtWindow() {
   VALUE cOldWindow = rb_const_get(rb_cObject, rb_intern("Window"));
   VALUE cWindow = rb_define_class_under(mExtRgss, "Window", rb_cObject);
@@ -153,4 +178,6 @@ void Init_ExtWindow() {
   rb_define_method(cWindow, "x", Window_x, 0);
   rb_define_method(cWindow, "y=", Window_y_set, 1);
   rb_define_method(cWindow, "y", Window_y, 0);
+  rb_define_method(cWindow, "openness=", Window_openness_set, 1);
+  rb_define_method(cWindow, "openness", Window_openness, 0);
 }
