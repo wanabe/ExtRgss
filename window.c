@@ -36,10 +36,10 @@ static VALUE Window_initialize(int argc, VALUE *argv, VALUE self) {
   Window *window = EXT_WINDOW(self);
 
   rb_ary_push(windows, self);
-  old_call(self, rb_intern("initialize"), argc, argv);
 
   contents = old_call(self, rb_intern("contents"), 0, NULL); /* TODO */
   rb_ivar_set(self, rb_intern("@contents"), contents);
+  window->contents = contents;
 
   cursor_rect = old_call(self, rb_intern("cursor_rect"), 0, NULL); /* TODO */
   rb_ivar_set(self, rb_intern("@cursor_rect"), cursor_rect);
@@ -54,6 +54,20 @@ static VALUE Window_initialize(int argc, VALUE *argv, VALUE self) {
   return self;
 }
 
+static VALUE Window_contents_set(VALUE self, VALUE contents) {
+  Window *window = EXT_WINDOW(self);
+
+  window->contents = contents;
+  old_call(self, rb_intern("contents="), 1, &contents);
+  return contents;
+}
+
+static VALUE Window_contents(VALUE self) {
+  Window *window = EXT_WINDOW(self);
+
+  return window->contents;
+}
+
 void Init_ExtWindow() {
   VALUE cOldWindow = rb_const_get(rb_cObject, rb_intern("Window"));
   VALUE cWindow = rb_define_class_under(mExtRgss, "Window", rb_cObject);
@@ -62,4 +76,6 @@ void Init_ExtWindow() {
 
   rb_define_alloc_func(cWindow, Window_s_alloc);
   rb_define_method(cWindow, "initialize", Window_initialize, -1);
+  rb_define_method(cWindow, "contents=", Window_contents_set, 1);
+  rb_define_method(cWindow, "contents", Window_contents, 0);
 }
