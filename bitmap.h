@@ -9,4 +9,5 @@ typedef struct {
 extern VALUE cBitmap;
 
 extern void Bitmap__init_extdata(VALUE bmp);
+extern void BitmapData__update(RgssBitmapData *bmpdata);
 extern void Init_ExtBitmap();

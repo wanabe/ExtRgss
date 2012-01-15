@@ -3,12 +3,9 @@
 
 VALUE cBitmap;
 
-static void BitmapData__update(RgssBitmapData *bmpdata) {
+void BitmapData__update(RgssBitmapData *bmpdata) {
   BitmapExtData *extdata;
 
-  if (!bmpdata) {
-    return;
-  }
   extdata = BITMAP_EXTDATA(bmpdata);
   if(!extdata->changed) {
     return;
@@ -36,8 +33,17 @@ static VALUE Bitmap_initialize(int argc, VALUE *argv, VALUE self) {
   return self;
 }
 
+static VALUE Bitmap_draw_text(int argc, VALUE *argv, VALUE self) {
+  BitmapExtData *extdata = BITMAP_EXTDATA(RGSS_BITMAPDATA(self));
+  rb_funcall2(self, rb_intern("old_draw_text"), argc, argv);
+  extdata->changed = 1;
+  return self;
+}
+
 void Init_ExtBitmap() {
   cBitmap = rb_const_get(rb_cObject, rb_intern("Bitmap"));
   rb_define_alias(cBitmap, "old_initialize", "initialize");
   rb_define_method(cBitmap, "initialize", Bitmap_initialize, -1);
+  rb_define_alias(cBitmap, "old_draw_text", "draw_text");
+  rb_define_method(cBitmap, "draw_text", Bitmap_draw_text, -1);
 }
