@@ -1,8 +1,8 @@
 #ifndef __EXTRGSS_GRAPHICS_H__
 #define __EXTRGSS_GRAPHICS_H__
 
-#include "d3d9.h"
-#include "d3dx9.h"
+#include <d3d9.h>
+#include <d3dx9.h>
 
 #define FVF_VERTEX   (D3DFVF_XYZB1 | D3DFVF_LASTBETA_UBYTE4 | D3DFVF_DIFFUSE | D3DFVF_TEX1)
 typedef struct
