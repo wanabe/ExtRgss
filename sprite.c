@@ -59,10 +59,10 @@ void Sprite__update_rect(Sprite *sprite) {
   int h = BITMAP_EXTDATA(bmpdata)->texh;
 
   v[0].z = v[1].z = v[2].z = v[3].z = 0;
-  v[0].x = v[2].x = x;
-  v[0].y = v[1].y = y;
-  v[1].x = v[3].x = x + rect->w;
-  v[2].y = v[3].y = y + rect->h;
+  v[0].x = v[2].x = x - 0.5;
+  v[0].y = v[1].y = y - 0.5;
+  v[1].x = v[3].x = x + rect->w - 0.5;
+  v[2].y = v[3].y = y + rect->h - 0.5;
   v[0].u = v[2].u = (double)rect->x / w;
   v[0].v = v[1].v = (double)rect->y / h;
   v[1].u = v[3].u = (double)(rect->x + rect->w) / w;

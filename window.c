@@ -34,10 +34,10 @@ static void Window__update_vertex(Window *window) {
   BitmapExtData *extdata = BITMAP_EXTDATA(bmpdata);
   VERTEX *v = window->vertex_data;
   v[0].z = v[1].z = v[2].z = v[3].z = 0;
-  v[0].x = v[2].x = window->x;
-  v[0].y = v[1].y = window->y;
-  v[1].x = v[3].x = window->x + window->width;
-  v[2].y = v[3].y = window->y + window->height;
+  v[0].x = v[2].x = window->x - 0.5;
+  v[0].y = v[1].y = window->y - 0.5;
+  v[1].x = v[3].x = window->x + window->width - 0.5;
+  v[2].y = v[3].y = window->y + window->height - 0.5;
   v[0].u = v[2].u = 0;
   v[0].v = v[1].v = 0;
   v[1].u = v[3].u = (double)(window->width - 12 * 2) / extdata->texw;
