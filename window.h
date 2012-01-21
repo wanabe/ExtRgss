@@ -1,5 +1,5 @@
 typedef struct {
-  VALUE contents;
+  VALUE contents, skin;
   VALUE cursor_rect;
   VERTEX vertex_data[8];
   int x, y, ox, oy;

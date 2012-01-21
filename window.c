@@ -87,21 +87,6 @@ static VALUE Window_initialize(int argc, VALUE *argv, VALUE self) {
   return self;
 }
 
-static VALUE Window_contents_set(VALUE self, VALUE contents) {
-  Window *window = EXT_WINDOW(self);
-
-  window->contents = contents;
-  old_call(self, rb_intern("contents="), 1, &contents);
-  Window__update_vertex(window);
-  return contents;
-}
-
-static VALUE Window_contents(VALUE self) {
-  Window *window = EXT_WINDOW(self);
-
-  return window->contents;
-}
-
 static VALUE Window_dispose(VALUE self) {
   Window *window = EXT_WINDOW(self);
 
@@ -168,6 +153,35 @@ static VALUE Window_openness(VALUE self) {
   return INT2FIX(window->openness);
 }
 
+static VALUE Window_contents_set(VALUE self, VALUE contents) {
+  Window *window = EXT_WINDOW(self);
+
+  window->contents = contents;
+  old_call(self, rb_intern("contents="), 1, &contents);
+  Window__update_vertex(window);
+  return contents;
+}
+
+static VALUE Window_contents(VALUE self) {
+  Window *window = EXT_WINDOW(self);
+
+  return window->contents;
+}
+
+static VALUE Window_windowskin_set(VALUE self, VALUE skin) {
+  Window *window = EXT_WINDOW(self);
+
+  window->skin = skin;
+  old_call(self, rb_intern("windowskin="), 1, &skin);
+  return skin;
+}
+
+static VALUE Window_windowskin(VALUE self) {
+  Window *window = EXT_WINDOW(self);
+
+  return window->skin;
+}
+
 void Init_ExtWindow() {
   VALUE cOldWindow = rb_const_get(rb_cObject, rb_intern("Window"));
   VALUE cWindow = rb_define_class_under(mExtRgss, "Window", rb_cObject);
@@ -177,12 +191,14 @@ void Init_ExtWindow() {
   rb_define_alloc_func(cWindow, Window_s_alloc);
   rb_define_method(cWindow, "initialize", Window_initialize, -1);
   rb_define_method(cWindow, "dispose", Window_dispose, 0);
-  rb_define_method(cWindow, "contents=", Window_contents_set, 1);
-  rb_define_method(cWindow, "contents", Window_contents, 0);
   rb_define_method(cWindow, "x=", Window_x_set, 1);
   rb_define_method(cWindow, "x", Window_x, 0);
   rb_define_method(cWindow, "y=", Window_y_set, 1);
   rb_define_method(cWindow, "y", Window_y, 0);
   rb_define_method(cWindow, "openness=", Window_openness_set, 1);
   rb_define_method(cWindow, "openness", Window_openness, 0);
+  rb_define_method(cWindow, "contents=", Window_contents_set, 1);
+  rb_define_method(cWindow, "contents", Window_contents, 0);
+  rb_define_method(cWindow, "windowskin=", Window_windowskin_set, 1);
+  rb_define_method(cWindow, "windowskin", Window_windowskin, 0);
 }
