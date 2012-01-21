@@ -107,6 +107,9 @@ static VALUE Graphics_s_update(VALUE self) {
       if(window->disposed || !window->visible || !RTEST(skin)) {
         continue;
       }
+      if(window->openness == 0) {
+        continue;
+      }
       bmpdata = RGSS_BITMAPDATA(skin);
       if(passed_bmpdata != bmpdata) {
         passed_bmpdata = bmpdata;

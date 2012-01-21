@@ -55,6 +55,7 @@ float4 WindowContentsPixelShader(float2 texCoord0 :TEXCOORD0) :COLOR0 {
 TEX_VS_OUTPUT WindowVertexShader(
   float4 pos :POSITION, float4 diffuse :COLOR0, float4 texCoord0 :TEXCOORD0, float4 indices :BLENDINDICES) {
   TEX_VS_OUTPUT outVS;
+  float closeness = texCoord0.y * (255 - indices[0]) / 510;
 
   if(texCoord0.x < 0) {
     texCoord0.z = -texCoord0.x - 32;
@@ -64,9 +65,11 @@ TEX_VS_OUTPUT WindowVertexShader(
     texCoord0.x = texCoord0.x - 16;
   }
   if(texCoord0.y < 0) {
+    pos.y -= closeness;
     texCoord0.w = -texCoord0.y - 32;
     texCoord0.y = -16;
   } else {
+    pos.y -= closeness;
     texCoord0.w = texCoord0.y - 32;
     texCoord0.y = texCoord0.y - 16;
   }
@@ -77,19 +80,19 @@ TEX_VS_OUTPUT WindowVertexShader(
 }
 float4 WindowPixelShader(float4 texCoord0 :TEXCOORD0) :COLOR0 {
   if(texCoord0.x < 0) {
-    texCoord0.x = 0.5 + (16 + texCoord0.x) / SKIN_WIDTH;
+    texCoord0.x = (64 + 16 + texCoord0.x) / SKIN_WIDTH;
   } else {
     if(texCoord0.x >= texCoord0.z) {
-      texCoord0.x = 1.0 + (texCoord0.x - texCoord0.z - 16) / SKIN_WIDTH;
+      texCoord0.x = (128 - 16 + texCoord0.x - texCoord0.z) / SKIN_WIDTH;
     } else {
       discard; // TODO
     }
   }
   if(texCoord0.y < 0) {
-    texCoord0.y = (16 + texCoord0.y) / SKIN_HEIGHT;
+    texCoord0.y = (0 + 16 + texCoord0.y) / SKIN_HEIGHT;
   } else {
     if(texCoord0.y >= texCoord0.w) {
-      texCoord0.y = 0.5 + (texCoord0.y - texCoord0.w - 16) / SKIN_HEIGHT;
+      texCoord0.y = (64 - 16 + texCoord0.y - texCoord0.w) / SKIN_HEIGHT;
     } else {
      discard; // TODO
     }
