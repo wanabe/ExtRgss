@@ -100,6 +100,24 @@ static VALUE Graphics_s_update(VALUE self) {
 
     ptr = RARRAY_PTR(windows);
     len = RARRAY_LEN(windows);
+    pEffect->lpVtbl->BeginPass(pEffect, 2);
+    for(i = 0; i < len; i++) {
+      Window *window = EXT_WINDOW(ptr[i]);
+      VALUE skin = window->skin;
+      if(window->disposed || !window->visible || !RTEST(skin)) {
+        continue;
+      }
+      bmpdata = RGSS_BITMAPDATA(skin);
+      if(passed_bmpdata != bmpdata) {
+        passed_bmpdata = bmpdata;
+        BitmapData__update(bmpdata);
+        pEffect->lpVtbl->SetTexture(pEffect, "Tex", (LPDIRECT3DBASETEXTURE9)BITMAP_EXTDATA(bmpdata)->texture);
+        pEffect->lpVtbl->CommitChanges(pEffect);
+      }
+      pD3DDevice->lpVtbl->DrawPrimitiveUP(pD3DDevice, D3DPT_TRIANGLESTRIP, 2, window->vertex_data, sizeof(VERTEX));
+    }
+    pEffect->lpVtbl->EndPass(pEffect);
+
     pEffect->lpVtbl->BeginPass(pEffect, 1);
     for(i = 0; i < len; i++) {
       Window *window = EXT_WINDOW(ptr[i]);

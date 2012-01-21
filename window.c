@@ -38,10 +38,12 @@ static void Window__update_vertex(Window *window) {
   v[0].y = v[1].y = window->y - 0.5;
   v[1].x = v[3].x = window->x + window->width - 0.5;
   v[2].y = v[3].y = window->y + window->height - 0.5;
-  v[0].u = v[2].u = 0;
-  v[0].v = v[1].v = 0;
-  v[1].u = v[3].u = (double)(window->width - 12 * 2) / extdata->texw;
-  v[2].v = v[3].v = (double)(window->height - 12 - 12) / extdata->texh;
+  v[0].u = v[2].u = -window->width;
+  v[0].v = v[1].v = -window->height;
+  v[1].u = v[3].u = window->width;
+  v[2].v = v[3].v = window->height;
+  v[0].w = v[1].w = v[2].w = v[3].w = extdata->texw;
+  v[0].h = v[1].h = v[2].h = v[3].h = extdata->texh;
   v[0].b1 = v[1].b1 = v[2].b1 = v[3].b1 = window->openness;
 }
 
