@@ -45,6 +45,8 @@ static void Window__update_vertex(Window *window) {
   v[0].w = v[1].w = v[2].w = v[3].w = extdata->texw;
   v[0].h = v[1].h = v[2].h = v[3].h = extdata->texh;
   v[0].b1 = v[1].b1 = v[2].b1 = v[3].b1 = window->openness;
+  v[0].b2 = v[1].b2 = v[2].b2 = v[3].b2 = window->opacity;
+  v[0].b3 = v[1].b3 = v[2].b3 = v[3].b3 = window->contents_opacity;
 }
 
 static VALUE Window_initialize(int argc, VALUE *argv, VALUE self) {
@@ -83,6 +85,7 @@ static VALUE Window_initialize(int argc, VALUE *argv, VALUE self) {
   window->disposed = 0;
   window->visible = 1;
   window->openness = 255;
+  window->opacity = window->contents_opacity = 255;
 
   Window__update_vertex(window);
 
@@ -155,6 +158,52 @@ static VALUE Window_openness(VALUE self) {
   return INT2FIX(window->openness);
 }
 
+static VALUE Window_opacity_set(VALUE self, VALUE opacity) {
+  Window *window = EXT_WINDOW(self);
+  int o;
+
+  o = NUM2LONG(opacity);
+  if(o < 0) {
+    o = 0;
+  } else if(o > 255) {
+    o = 255;
+  }
+  window->opacity = o;
+  opacity = INT2FIX(o);
+  Window__update_vertex(window);
+  old_call(self, rb_intern("opacity="), 1, &opacity);
+  return opacity;
+}
+
+static VALUE Window_opacity(VALUE self) {
+  Window *window = EXT_WINDOW(self);
+
+  return INT2FIX(window->opacity);
+}
+
+static VALUE Window_contents_opacity_set(VALUE self, VALUE contents_opacity) {
+  Window *window = EXT_WINDOW(self);
+  int o;
+
+  o = NUM2LONG(contents_opacity);
+  if(o < 0) {
+    o = 0;
+  } else if(o > 255) {
+    o = 255;
+  }
+  window->contents_opacity = o;
+  contents_opacity = INT2FIX(o);
+  Window__update_vertex(window);
+  old_call(self, rb_intern("contents_opacity="), 1, &contents_opacity);
+  return contents_opacity;
+}
+
+static VALUE Window_contents_opacity(VALUE self) {
+  Window *window = EXT_WINDOW(self);
+
+  return INT2FIX(window->contents_opacity);
+}
+
 static VALUE Window_contents_set(VALUE self, VALUE contents) {
   Window *window = EXT_WINDOW(self);
 
@@ -199,6 +248,10 @@ void Init_ExtWindow() {
   rb_define_method(cWindow, "y", Window_y, 0);
   rb_define_method(cWindow, "openness=", Window_openness_set, 1);
   rb_define_method(cWindow, "openness", Window_openness, 0);
+  rb_define_method(cWindow, "opacity=", Window_opacity_set, 1);
+  rb_define_method(cWindow, "opacity", Window_opacity, 0);
+  rb_define_method(cWindow, "contents_opacity=", Window_contents_opacity_set, 1);
+  rb_define_method(cWindow, "contents_opacity", Window_contents_opacity, 0);
   rb_define_method(cWindow, "contents=", Window_contents_set, 1);
   rb_define_method(cWindow, "contents", Window_contents, 0);
   rb_define_method(cWindow, "windowskin=", Window_windowskin_set, 1);

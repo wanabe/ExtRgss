@@ -44,12 +44,13 @@ TEX_VS_OUTPUT WindowContentsVertexShader(
     pos.y = -1;
   }
   outVS.pos = mul(pos, matWVP);
+  diffuse.a = indices[2] / 255;
   outVS.diffuse = diffuse;
   outVS.texCoord0 = texCoord0;
   return outVS;
 }
-float4 WindowContentsPixelShader(float2 texCoord0 :TEXCOORD0) :COLOR0 {
-  return tex2D(TexSampler, texCoord0);
+float4 WindowContentsPixelShader(float4 diffuse :COLOR0, float2 texCoord0 :TEXCOORD0) :COLOR0 {
+  return tex2D(TexSampler, texCoord0) * diffuse.a;
 }
 
 TEX_VS_OUTPUT WindowVertexShader(
@@ -74,11 +75,12 @@ TEX_VS_OUTPUT WindowVertexShader(
     texCoord0.y = texCoord0.y - 16;
   }
   outVS.pos = mul(pos, matWVP);
+  diffuse.a = indices[1] / 255;
   outVS.diffuse = diffuse;
   outVS.texCoord0 = texCoord0;
   return outVS;
 }
-float4 WindowPixelShader(float4 texCoord0 :TEXCOORD0) :COLOR0 {
+float4 WindowPixelShader(float4 diffuse :COLOR0, float4 texCoord0 :TEXCOORD0) :COLOR0 {
   bool inner = false;
   if(texCoord0.x < 0) {
     texCoord0.x = (64 + 16 + texCoord0.x) / SKIN_WIDTH;
@@ -101,7 +103,7 @@ float4 WindowPixelShader(float4 texCoord0 :TEXCOORD0) :COLOR0 {
      discard;
     }
   }
-  return tex2D(TexSampler, texCoord0);
+  return tex2D(TexSampler, texCoord0) * diffuse.a;
 }
 
 technique ExtRgssTec {
