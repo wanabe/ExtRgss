@@ -79,13 +79,15 @@ TEX_VS_OUTPUT WindowVertexShader(
   return outVS;
 }
 float4 WindowPixelShader(float4 texCoord0 :TEXCOORD0) :COLOR0 {
+  bool inner = false;
   if(texCoord0.x < 0) {
     texCoord0.x = (64 + 16 + texCoord0.x) / SKIN_WIDTH;
   } else {
     if(texCoord0.x >= texCoord0.z) {
       texCoord0.x = (128 - 16 + texCoord0.x - texCoord0.z) / SKIN_WIDTH;
     } else {
-      discard; // TODO
+      texCoord0.x = (64 + 16 + texCoord0.x % 32) / SKIN_WIDTH;
+      inner = true;
     }
   }
   if(texCoord0.y < 0) {
@@ -93,8 +95,10 @@ float4 WindowPixelShader(float4 texCoord0 :TEXCOORD0) :COLOR0 {
   } else {
     if(texCoord0.y >= texCoord0.w) {
       texCoord0.y = (64 - 16 + texCoord0.y - texCoord0.w) / SKIN_HEIGHT;
+    } else if (!inner) {
+      texCoord0.y = (16 + texCoord0.y % 32) / SKIN_HEIGHT;
     } else {
-     discard; // TODO
+     discard;
     }
   }
   return tex2D(TexSampler, texCoord0);
