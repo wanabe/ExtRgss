@@ -233,6 +233,21 @@ static VALUE Window_windowskin(VALUE self) {
   return window->skin;
 }
 
+static VALUE Window_visible_set(VALUE self, VALUE visible) {
+  Window *window = EXT_WINDOW(self);
+
+  window->visible = !!RTEST(visible);
+  old_call(self, rb_intern("visible="), 1, &visible);
+
+  return visible;
+}
+
+static VALUE Window_visible(VALUE self) {
+  Window *window = EXT_WINDOW(self);
+
+  return window->visible ? Qtrue : Qfalse;
+}
+
 void Init_ExtWindow() {
   VALUE cOldWindow = rb_const_get(rb_cObject, rb_intern("Window"));
   VALUE cWindow = rb_define_class_under(mExtRgss, "Window", rb_cObject);
@@ -256,4 +271,6 @@ void Init_ExtWindow() {
   rb_define_method(cWindow, "contents", Window_contents, 0);
   rb_define_method(cWindow, "windowskin=", Window_windowskin_set, 1);
   rb_define_method(cWindow, "windowskin", Window_windowskin, 0);
+  rb_define_method(cWindow, "visible=", Window_visible_set, 1);
+  rb_define_method(cWindow, "visible", Window_visible, 0);
 }
