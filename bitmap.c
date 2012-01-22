@@ -53,10 +53,19 @@ static VALUE Bitmap_draw_text(int argc, VALUE *argv, VALUE self) {
   return self;
 }
 
+static VALUE Bitmap_clear(VALUE self) {
+  BitmapExtData *extdata = BITMAP_EXTDATA(RGSS_BITMAPDATA(self));
+  rb_funcall2(self, rb_intern("old_clear"), 0, NULL);
+  extdata->changed = 1;
+  return self;
+}
+
 void Init_ExtBitmap() {
   cBitmap = rb_const_get(rb_cObject, rb_intern("Bitmap"));
   rb_define_alias(cBitmap, "old_initialize", "initialize");
   rb_define_method(cBitmap, "initialize", Bitmap_initialize, -1);
   rb_define_alias(cBitmap, "old_draw_text", "draw_text");
   rb_define_method(cBitmap, "draw_text", Bitmap_draw_text, -1);
+  rb_define_alias(cBitmap, "old_clear", "clear");
+  rb_define_method(cBitmap, "clear", Bitmap_clear, 0);
 }
